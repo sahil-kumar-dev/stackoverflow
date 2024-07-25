@@ -1,19 +1,16 @@
 'use client'
 
-import { useTheme } from '@/context/ThemeProvider'
 import {
     Menubar,
     MenubarContent,
     MenubarItem,
     MenubarMenu,
-    MenubarSeparator,
-    MenubarShortcut,
-    MenubarTrigger,
+    MenubarTrigger
 } from "@/components/ui/menubar"
+import { useTheme } from '@/context/ThemeProvider'
 
-import React from 'react'
-import Image from 'next/image'
 import { themes } from '@/constants'
+import Image from 'next/image'
 
 const Theme = () => {
 
@@ -23,7 +20,7 @@ const Theme = () => {
         <div>
             <Menubar className='relative border-none bg-transparent shadow-none'>
                 <MenubarMenu>
-                    <MenubarTrigger className='focus:bg-light-900 data-[state=open]:bg-light-900 dark:focus:bg-dark-200 dark:data-[state=open]:bg-dark-200'>
+                    <MenubarTrigger className='focus:bg-light-900 data-[state=open]:bg-light-900 dark:focus:bg-dark-200 dark:data-[state=open]:bg-dark-200 cursor-pointer'>
                         {
                             mode == 'light' ? (
                                 <Image
@@ -57,7 +54,7 @@ const Theme = () => {
                                             localStorage.removeItem('theme')
                                         }
                                     }}
-                                    className='flex items-center gap-4 px-2.5 py-2 dark:focus:bg-dark-400'
+                                    className='flex items-center gap-4 px-2.5 py-2 dark:focus:bg-dark-400 cursor-pointer'
                                 >
                                     <Image
                                         src={item.icon}
@@ -73,7 +70,6 @@ const Theme = () => {
                     </MenubarContent>
                 </MenubarMenu>
             </Menubar>
-
         </div>
     )
 }
