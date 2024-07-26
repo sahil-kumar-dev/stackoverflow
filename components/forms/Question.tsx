@@ -85,6 +85,7 @@ const Question = ({mongoUserId}:{mongoUserId:string}) => {
                 content: data.explanation,
                 tags: data.tags,
                 author:JSON.parse(mongoUserId),
+                path:'/'
             })
 
             router.push('/')
