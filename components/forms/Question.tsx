@@ -82,11 +82,10 @@ const Question = ({mongoUserId}:{mongoUserId:string}) => {
 
             await createQuestion({
                 title: data.title,
-                explanation: data.explanation,
+                content: data.explanation,
                 tags: data.tags,
                 author:JSON.parse(mongoUserId),
             })
-            console.log('question creted')
 
             router.push('/')
             
