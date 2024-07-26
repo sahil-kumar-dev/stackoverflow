@@ -5,6 +5,7 @@ import './globals.css'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import type { Metadata } from 'next'
 import { ThemeProvider } from '@/context/ThemeProvider'
+import NextTopLoader from 'nextjs-toploader';
 
 const inter = Inter({
 	subsets: ['latin'],
@@ -35,6 +36,10 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${inter.variable} ${space_grotesk.variable}`}>
+				<NextTopLoader
+					showSpinner={false}
+					color='#ff7000'
+				/>
 				<ClerkProvider
 					appearance={{
 						elements: {
