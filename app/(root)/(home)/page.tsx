@@ -101,9 +101,10 @@ const Home = () => {
 				{
 					questions.length > 0 ?
 						questions.map((question) => (
-							<QuestionCard
-								{...question}
-							/>
+							// <QuestionCard
+							// 	{...question}
+							// />
+							'question'
 						)) : (
 							<NoResult
 								title={`There's no question to show`}
@@ -113,7 +114,6 @@ const Home = () => {
 							/>
 						)
 				}
-				Question Card
 			</div>
 		</>
 	)
