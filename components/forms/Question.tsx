@@ -19,12 +19,19 @@ import { useRef, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 import { Badge } from '../ui/badge'
 import Image from 'next/image'
+import { createQuestion } from '@/lib/actions/question.action'
+import { title } from 'process'
+import { useRouter } from 'next/router'
+import { usePathname } from 'next/navigation'
 
-const Question = () => {
+const Question = ({mongoUserId}:{mongoUserId:string}) => {
 
     const type: any = 'submit'
 
     const editorRef = useRef(null);
+
+    const router = useRouter()
+    const pathname = usePathname()
 
 
     const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, field: any) => {
@@ -65,15 +72,26 @@ const Question = () => {
         }
     })
 
-    const onSubmit = (data: z.infer<typeof QuestionsSchema>) => {
+    const onSubmit = async (data: z.infer<typeof QuestionsSchema>) => {
         
         try {
             // async call to out api to create a question
             // if success, redirect to the question page
             // if fail, show error message
             // if fail, clear the form
-        } catch (error) {
+
+            await createQuestion({
+                title: data.title,
+                explanation: data.explanation,
+                tags: data.tags,
+                author:JSON.parse(mongoUserId),
+            })
+            console.log('question creted')
+
+            router.push('/')
             
+        } catch (error) {
+            console.log(error)
         }
     }
 
@@ -110,6 +128,10 @@ const Question = () => {
                                         editorRef.current = editor
                                     }}
                                     initialValue=""
+                                    onBlur={field.onBlur}
+                                    onEditorChange={(content)=> {
+                                        field.onChange(content)
+                                    }}
                                     init={{
                                         height: 350,
                                         menubar: false,
