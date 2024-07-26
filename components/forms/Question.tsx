@@ -21,7 +21,7 @@ import { Badge } from '../ui/badge'
 import Image from 'next/image'
 import { createQuestion } from '@/lib/actions/question.action'
 import { title } from 'process'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
 
 const Question = ({mongoUserId}:{mongoUserId:string}) => {
