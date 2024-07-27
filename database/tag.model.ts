@@ -9,7 +9,7 @@ export interface ITag extends Document {
 }
 
 const TagSchema = new Schema({
-  name: { type: String, required: true, unique: true },
+  name: { type: String, required: true, unique: true, set: (value: string) => value.toUpperCase() },
   description: { type: String, required: true },
   questions: [{ type: Schema.Types.ObjectId, ref: 'Question' }], 
   followers: [{ type: Schema.Types.ObjectId, ref: 'User' }], 

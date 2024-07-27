@@ -6,8 +6,15 @@ import LocalSearchbar from '@/components/shared/search/LocalSearchbar'
 import { Button } from '@/components/ui/button'
 import { HomePageFilters } from '@/constants/filters'
 import { getQuestions } from '@/lib/actions/question.action'
+import { Metadata } from 'next'
 import Link from 'next/link'
 import React from 'react'
+
+
+export const metadata:Metadata = {
+	title: 'Home | Dev Overflow',
+	description: 'Welcome to Dev Overflow - Your go-to platform for all your coding questions and answers'
+}
 
 const Home = async () => {
 

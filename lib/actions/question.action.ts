@@ -44,12 +44,13 @@ export async function createQuestion(params: CreateQuestionParams) {
         for (const tag of tags) {
             const existingTag = await Tag.findOneAndUpdate(
                 { name: { $regex: new RegExp(`^${tag}$`) } },
-                { $setOnInsert: { name: tag }, $push: { question: question._id } },
+                { $setOnInsert: { name: tag }, $push: { questions: question._id } }, // Changed 'question' to 'questions'
                 { upsert: true, new: true }
             )
 
             tagDocuments.push(existingTag._id)
         }
+
 
         await Question.findByIdAndUpdate(question._id, {
             $push: {
@@ -96,10 +97,11 @@ export async function getQuestionById(params: GetQuestionByIdParams) {
             .populate({ path: 'tags', model: Tag, select: '_id name' })
             .populate({ path: 'author', model: User, select: '_id clearkId name picture' })
 
+
         return question
 
     } catch (error) {
-
+        console.log(error)
     }
 }
 
