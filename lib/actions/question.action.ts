@@ -5,7 +5,7 @@ import Tag from "@/database/tag.model"
 import User from "@/database/user.model"
 import { revalidatePath } from "next/cache"
 import { connectToDatabase } from "../mongoose"
-import { CreateQuestionParams, GetQuestionsParams } from "./shared.types"
+import { CreateQuestionParams, GetQuestionByIdParams, GetQuestionsParams } from "./shared.types"
 
 
 export async function getQuestions(params: GetQuestionsParams) {
@@ -16,7 +16,7 @@ export async function getQuestions(params: GetQuestionsParams) {
         const questions = await Question.find({})
             .populate({ path: 'tags', model: Tag })
             .populate({ path: 'author', model: User })
-            .sort({createdAt:-1})
+            .sort({ createdAt: -1 })
 
         return { questions }
     } catch (error) {
@@ -66,5 +66,39 @@ export async function createQuestion(params: CreateQuestionParams) {
 
     } catch (error) {
         // handle error
+    }
+}
+
+
+export async function getHotQuestions() {
+    try {
+        connectToDatabase()
+
+        const hotQuestion = await Question.find({})
+            .sort({ views: -1, upvotes: -1 })
+            .limit(5)
+
+        return hotQuestion
+
+    } catch (error) {
+        // handle error 
+        console.log(error)
+    }
+}
+
+export async function getQuestionById(params: GetQuestionByIdParams) {
+    try {
+        connectToDatabase()
+
+        const { questionId } = params
+
+        const question = await Question.findById(questionId)
+            .populate({ path: 'tags', model: Tag, select: '_id name' })
+            .populate({ path: 'author', model: User, select: '_id clearkId name picture' })
+
+        return question
+
+    } catch (error) {
+
     }
 }

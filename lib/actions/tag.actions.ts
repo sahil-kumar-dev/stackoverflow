@@ -126,7 +126,7 @@ export async function getTopPopularTags() {
 			{ $project: { name: 1, numberOfQuestions: { $size: "$questions" } } },
 			{ $sort: { numberOfQuestions: -1 } },
 			{ $limit: 5 }
-		])
+		]).exec();
 
 		return popularTags;
 	} catch (error) {
