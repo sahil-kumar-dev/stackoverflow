@@ -23,8 +23,9 @@ import { createQuestion } from '@/lib/actions/question.action'
 import { title } from 'process'
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
+import { useTheme } from '@/context/ThemeProvider'
 
-const Question = ({mongoUserId}:{mongoUserId:string}) => {
+const Question = ({ mongoUserId }: { mongoUserId: string }) => {
 
     const type: any = 'submit'
 
@@ -32,6 +33,7 @@ const Question = ({mongoUserId}:{mongoUserId:string}) => {
 
     const router = useRouter()
     const pathname = usePathname()
+    const { mode } = useTheme()
 
 
     const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, field: any) => {
@@ -73,7 +75,7 @@ const Question = ({mongoUserId}:{mongoUserId:string}) => {
     })
 
     const onSubmit = async (data: z.infer<typeof QuestionsSchema>) => {
-        
+
         try {
             // async call to out api to create a question
             // if success, redirect to the question page
@@ -84,12 +86,12 @@ const Question = ({mongoUserId}:{mongoUserId:string}) => {
                 title: data.title,
                 content: data.explanation,
                 tags: data.tags,
-                author:JSON.parse(mongoUserId),
-                path:'/'
+                author: JSON.parse(mongoUserId),
+                path: '/'
             })
 
             router.push('/')
-            
+
         } catch (error) {
             console.log(error)
         }
@@ -129,7 +131,7 @@ const Question = ({mongoUserId}:{mongoUserId:string}) => {
                                     }}
                                     initialValue=""
                                     onBlur={field.onBlur}
-                                    onEditorChange={(content)=> {
+                                    onEditorChange={(content) => {
                                         field.onChange(content)
                                     }}
                                     init={{
@@ -143,7 +145,9 @@ const Question = ({mongoUserId}:{mongoUserId:string}) => {
                                         toolbar: 'undo redo | blocks | ' +
                                             'codesample | bold italic forecolor | alignleft aligncenter |' +
                                             'alignright alignjustify | bullist numlist ',
-                                        content_style: 'body { font-family:Inter; font-size:16px }'
+                                        content_style: 'body { font-family:Inter; font-size:16px }',
+                                        skin: mode === 'dark' ? 'oxide-dark' : 'oxide',
+                                        content_css: mode === 'dark' ? 'dark' : 'light'
                                     }}
                                 />
                             </FormControl>
