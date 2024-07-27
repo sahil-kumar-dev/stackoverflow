@@ -16,7 +16,6 @@ export async function viewQuestion(params: ViewQuestionParams) {
             })
 
             if (existingInteraction) {
-                console.log('use already viewed')
                 return
             } else {
                 await Question.findByIdAndUpdate(questionId, { $inc: { views: 1 } })

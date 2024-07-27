@@ -30,9 +30,9 @@ const LeftSidebar = () => {
                             href={item.route}
                             key={item.label}
                             className={`${isActive
-                                    ? "primary-gradient rounded-lg text-light-900"
+                                    ? "primary-gradient text-light-900"
                                     : "text-dark300_light900"
-                                }  flex items-center justify-start gap-4 bg-transparent p-4`}
+                                }  flex items-center justify-start gap-4 bg-transparent p-4 hover:bg-black rounded-lg transition-all duration-200 `}
                         >
                             <Image
                                 src={item.imgURL}
