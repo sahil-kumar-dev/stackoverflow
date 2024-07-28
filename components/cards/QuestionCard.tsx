@@ -91,13 +91,13 @@ const QuestionCard = ({
 						title=" Answers"
 						textStyles="small-medium text-dark400_light800"
 					/>
-					{/* <Metric
+					<Metric
 						imgUrl="/assets/icons/eye.svg"
 						alt="eye"
 						value={formatAndDivideNumber(views)}
 						title=" Views"
 						textStyles="small-medium text-dark400_light800"
-					/> */}
+					/>
 				</div>
 			</div>
 

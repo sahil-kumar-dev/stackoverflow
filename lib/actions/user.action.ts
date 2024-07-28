@@ -2,11 +2,12 @@
 
 import User from "@/database/user.model"
 import { connectToDatabase } from "../mongoose"
-import { CreateUserParams, DeleteUserParams, GetAllUsersParams, GetSavedQuestionsParams, ToggleSaveQuestionParams, UpdateUserParams } from "./shared.types"
+import { CreateUserParams, DeleteUserParams, GetAllUsersParams, GetSavedQuestionsParams, GetUserByIdParams, ToggleSaveQuestionParams, UpdateUserParams } from "./shared.types"
 import { revalidatePath } from "next/cache"
 import { FilterQuery } from 'mongoose'
 import Question from "@/database/question.model"
 import Tag from "@/database/tag.model"
+import Answer from "@/database/answer.model"
 
 export async function getUserById(params: any) {
     try {
@@ -167,6 +168,33 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
     }
 
     catch (error) {
+        console.log(error)
+    }
+}
+
+export async function getUserInfo(params: GetUserByIdParams) {
+    try {
+        connectToDatabase()
+
+        const { userId } = params
+
+        const user = await User.findOne({ clerkId: userId })
+
+        if(!user) {
+            throw new Error('User not found')
+        }
+
+        const totalQuestions = await Question.countDocuments({ autor: user._id })
+
+        const totalAnswers = await Answer.countDocuments({ autor: user._id })
+
+        return {
+            user,
+            totalQuestions,
+            totalAnswers
+        }
+
+    }catch(error) {
         console.log(error)
     }
 }
