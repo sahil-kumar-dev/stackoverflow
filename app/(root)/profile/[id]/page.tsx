@@ -16,7 +16,11 @@ import { SignedIn } from '@clerk/nextjs'
 
 const Page = async ({ params, searchParams }: URLProps) => {
 	const { userId: clerkId } = auth();
-	const userInfo = await getUserInfo({ userId: params.id })
+	const userInfo = await getUserInfo({ userId: params.id }) 
+
+	if(!userInfo){
+		return <div>User not found</div>
+	}
 
 	return (
 		<>
@@ -78,10 +82,10 @@ const Page = async ({ params, searchParams }: URLProps) => {
 			</div>
 
 			<Stats
-				reputation={userInfo.reputation}
+				reputation={userInfo.user.reputation}
 				totalQuestions={userInfo.totalQuestions}
 				totalAnswers={userInfo.totalAnswers}
-				badges={userInfo.badgeCounts}
+				badges={userInfo.user.badgeCounts}
 			/>
 
 			<div className="mt-10 flex gap-10">
