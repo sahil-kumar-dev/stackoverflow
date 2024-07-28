@@ -32,7 +32,7 @@ const LeftSidebar = () => {
                             className={`${isActive
                                     ? "primary-gradient text-light-900"
                                     : "text-dark300_light900"
-                                }  flex items-center justify-start gap-4 bg-transparent p-4 hover:bg-black rounded-lg transition-all duration-200 `}
+                                }  flex items-center justify-start gap-4 bg-transparent p-4 hover:bg-[#F4F6F8] dark:hover:bg-black rounded-lg transition-all duration-200 `}
                         >
                             <Image
                                 src={item.imgURL}

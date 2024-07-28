@@ -4,7 +4,6 @@ const isPublicRoute = createRouteMatcher([
     '/',
     '/api/webhook',
     '/api/chatgpt',
-    '/question/:id',
     '/tags',
     '/tags/:id',
     '/profile/:id',
