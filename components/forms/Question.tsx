@@ -19,21 +19,23 @@ import { useRef, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 import { Badge } from '../ui/badge'
 import Image from 'next/image'
-import { createQuestion } from '@/lib/actions/question.action'
+import { createQuestion, editQuestion } from '@/lib/actions/question.action'
 import { title } from 'process'
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
 import { useTheme } from '@/context/ThemeProvider'
 
-const Question = ({ mongoUserId }: { mongoUserId: string }) => {
-
-    const type: any = 'submit'
+const Question = ({ mongoUserId, type, questionDetails }: { mongoUserId: string, type: any, questionDetails?: any }) => {
 
     const editorRef = useRef(null);
 
     const router = useRouter()
     const pathname = usePathname()
     const { mode } = useTheme()
+
+    const parsedQuestionDetails = JSON.parse(questionDetails) || {}
+
+    const groupedTags = parsedQuestionDetails.tags.map((tag: any) => tag.name)
 
 
     const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, field: any) => {
@@ -68,29 +70,37 @@ const Question = ({ mongoUserId }: { mongoUserId: string }) => {
     const form = useForm<z.infer<typeof QuestionsSchema>>({
         resolver: zodResolver(QuestionsSchema),
         defaultValues: {
-            title: '',
-            explanation: '',
-            tags: [],
+            title: parsedQuestionDetails.title || '',
+            explanation: parsedQuestionDetails.content || '',
+            tags: groupedTags || [],
         }
     })
 
     const onSubmit = async (data: z.infer<typeof QuestionsSchema>) => {
 
         try {
-            // async call to out api to create a question
-            // if success, redirect to the question page
-            // if fail, show error message
-            // if fail, clear the form
 
-            await createQuestion({
-                title: data.title,
-                content: data.explanation,
-                tags: data.tags,
-                author: JSON.parse(mongoUserId),
-                path: '/'
-            })
+            if (type === 'edit') {
+                await editQuestion({
+                    questionId: parsedQuestionDetails._id,
+                    title: data.title,
+                    content: data.explanation,
+                    path: pathname
+                })
 
-            router.push('/')
+                router.push(`/question/${parsedQuestionDetails._id}`)
+            } else {
+                await createQuestion({
+                    title: data.title,
+                    content: data.explanation,
+                    tags: data.tags,
+                    author: JSON.parse(mongoUserId),
+                    path: '/'
+                })
+
+                router.push('/')
+            }
+
 
         } catch (error) {
             console.log(error)
@@ -129,7 +139,7 @@ const Question = ({ mongoUserId }: { mongoUserId: string }) => {
                                         // @ts-ignore
                                         editorRef.current = editor
                                     }}
-                                    initialValue=""
+                                    initialValue={parsedQuestionDetails.content || ''}
                                     onBlur={field.onBlur}
                                     onEditorChange={(content) => {
                                         field.onChange(content)
@@ -166,21 +176,25 @@ const Question = ({ mongoUserId }: { mongoUserId: string }) => {
                             <FormLabel className='paragraph-semibold text-dark400_light800'>Tags <span className="text-primary-500">*</span></FormLabel>
                             <FormControl>
                                 <>
-                                    <Input placeholder='Add tags...' className='no-focus paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 min-h-[56px] border' onKeyDown={(e) => handleInputKeyDown(e, field)} />
+                                    <Input disabled={type === 'edit'} placeholder='Add tags...' className='no-focus paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 min-h-[56px] border' onKeyDown={(e) => handleInputKeyDown(e, field)} />
                                     {
                                         field.value.length > 0 && (
                                             <div className='flex-start mt-2.5 gap-2.5'>
                                                 {
                                                     field.value.map((tag, index) => (
-                                                        <Badge key={index} className='subtl-medium background-light800_dark300 text-light400_light500 flex items-center justify-center gap-2 rounded-md border-none px-4 py-2 capitalize ' onClick={() => handleRemoveTag(tag, field)}>
+                                                        <Badge key={index} className='subtl-medium background-light800_dark300 text-light400_light500 flex items-center justify-center gap-2 rounded-md border-none px-4 py-2 capitalize ' onClick={() => type !== 'edit' ? handleRemoveTag(tag, field) : null}>
                                                             {tag}
-                                                            <Image
-                                                                src={'/assets/icons/close.svg'}
-                                                                height={12}
-                                                                width={12}
-                                                                alt='close icons'
-                                                                className='cursor-pointer object-contain invert-0 dark:invert'
-                                                            />
+                                                            {
+                                                                type !== 'edit' && (
+                                                                    <Image
+                                                                        src={'/assets/icons/close.svg'}
+                                                                        height={12}
+                                                                        width={12}
+                                                                        alt='close icons'
+                                                                        className='cursor-pointer object-contain invert-0 dark:invert'
+                                                                    />
+                                                                )
+                                                            }
                                                         </Badge>
                                                     ))
                                                 }
