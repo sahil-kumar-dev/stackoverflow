@@ -89,7 +89,16 @@ export async function getAllUsers(params: GetAllUsersParams) {
 
         const { searchQuery, filter, page = 1, pageSize = 20 } = params
 
-        const users = await User.find({})
+        const query:FilterQuery<typeof User> = {}
+
+        if(searchQuery){
+            query.$or = [
+                {name:{$regex:new RegExp(searchQuery,"i")}},
+                {username:{$regex:new RegExp(searchQuery,"i")}}
+            ]
+        }
+
+        const users = await User.find(query)
             .limit(pageSize)
             .skip((page - 1) * pageSize)
             .sort({ createdAt: -1 })
@@ -145,7 +154,7 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
                 path: 'saved',
                 match: query,
                 model: Question,
-                select: '_id title createdAt tags',
+                select: '_id title createdAt tags views answers',
                 options: {
                     sort: {
                         createdAt: -1

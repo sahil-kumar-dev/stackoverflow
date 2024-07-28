@@ -51,6 +51,8 @@ const QuestionCard = ({
 }: QuestionProps) => {
 	const showActionButtons = clerkId && clerkId === author.clerkId;
 
+	console.log(answers)
+
 	return (
 		<div className="card-wrapper rounded-[10px] p-9 sm:px-11">
 			<div className="flex flex-col-reverse items-start justify-between gap-5 sm:flex-row">
@@ -99,7 +101,7 @@ const QuestionCard = ({
 					<Metric
 						imgUrl="/assets/icons/message.svg"
 						alt="message"
-						value={formatAndDivideNumber(answers?.length>0? answers?.length : 0)}
+						value={formatAndDivideNumber(answers.length)}
 						title=" Answers"
 						textStyles="small-medium text-dark400_light800"
 					/>

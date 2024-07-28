@@ -20,7 +20,7 @@ export async function createAnswer(params: CreateAnswerParams) {
         // add the answer to the question's answer array
 
         await Question.findByIdAndUpdate(question, {
-            $push: { answer: newAnswer._id }
+            $push: { answers: newAnswer._id }
         })
 
         // Todo add interaction
