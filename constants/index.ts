@@ -71,3 +71,6 @@ export const BADGE_CRITERIA = {
         GOLD: 100000,
     },
 };
+
+
+export const pageSize :number = 20

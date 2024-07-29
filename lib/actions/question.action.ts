@@ -9,6 +9,7 @@ import { CreateQuestionParams, DeleteQuestionParams, EditQuestionParams, GetQues
 import Answer from "@/database/answer.model"
 import Interaction from "@/database/interaction.model"
 import { FilterQuery } from "mongoose"
+import { pageSize } from "@/constants"
 
 
 export async function getQuestions(params: GetQuestionsParams) {
@@ -16,25 +17,52 @@ export async function getQuestions(params: GetQuestionsParams) {
         // connect to DB
         connectToDatabase()
 
-        const {searchQuery} = params
+        const { searchQuery, filter, page = 1} = params
 
-        const query:FilterQuery<typeof Question> = {}
+        const skipSize = (page - 1) * 20
 
-        if(searchQuery){
+        const query: FilterQuery<typeof Question> = {}
+
+        if (searchQuery) {
             query.$or = [
-                {title:{$regex:new RegExp(searchQuery,"i")}},
-                {content:{$regex:new RegExp(searchQuery,"i")}}
+                { title: { $regex: new RegExp(searchQuery, "i") } },
+                { content: { $regex: new RegExp(searchQuery, "i") } }
             ]
+        }
+
+        let sortOptions = {}
+
+        switch (filter) {
+            case "newest":
+                sortOptions = { createdAt: -1 }
+                break
+            case "frequent":
+                sortOptions = { views: -1 }
+                break
+            case "unanswered":
+                query.answers = { $size: 0 }
+                break
+            default:
+                sortOptions = { createdAt: -1 } // Default to newest
+                break
         }
 
         const questions = await Question.find(query)
             .populate({ path: 'tags', model: Tag })
             .populate({ path: 'author', model: User })
-            .sort({ createdAt: -1 })
+            .populate({ path: 'answers', model: Answer })
+            .sort(sortOptions)
+            .skip(skipSize)
+            .limit(pageSize)
 
-        return { questions }
+        const totalQuestions = questions.length
+
+        const isNext: boolean = totalQuestions > skipSize + pageSize
+
+        return { questions,isNext }
     } catch (error) {
         console.log(error)
+        throw error // Re-throw the error for proper error handling
     }
 }
 
@@ -49,7 +77,7 @@ export async function createQuestion(params: CreateQuestionParams) {
 
         const tagDocuments = []
 
-        
+
 
         const question = await Question.create({
             title,
@@ -140,9 +168,9 @@ export async function upvoteQuestion(params: QuestionVoteParams) {
             updateQuery = { $addToSet: { upvotes: userId } }
         }
 
-        const question = await Question.findByIdAndUpdate(questionId,updateQuery,{new:true})
+        const question = await Question.findByIdAndUpdate(questionId, updateQuery, { new: true })
 
-        if(!question){
+        if (!question) {
             throw new Error("Question not found")
         }
 
@@ -177,9 +205,9 @@ export async function downvoteQuestion(params: QuestionVoteParams) {
             updateQuery = { $addToSet: { downvotes: userId } }
         }
 
-        const question = await Question.findByIdAndUpdate(questionId,updateQuery,{new:true})
+        const question = await Question.findByIdAndUpdate(questionId, updateQuery, { new: true })
 
-        if(!question){
+        if (!question) {
             throw new Error("Question not found")
         }
 
@@ -194,16 +222,16 @@ export async function downvoteQuestion(params: QuestionVoteParams) {
     }
 }
 
-export async function editQuestion(params: EditQuestionParams){
-    try{
+export async function editQuestion(params: EditQuestionParams) {
+    try {
 
         connectToDatabase()
 
-        const {questionId, path, title, content} = params
+        const { questionId, path, title, content } = params
 
         const question = await Question.findById(questionId).populate('tags')
 
-        if(!question){
+        if (!question) {
             throw new Error("Question not found")
         }
 
@@ -214,28 +242,28 @@ export async function editQuestion(params: EditQuestionParams){
 
         revalidatePath(path)
 
-    }catch(error){
+    } catch (error) {
         console.log(error)
     }
 }
-export async function deleteQuestion(params: DeleteQuestionParams){
-    try{
+export async function deleteQuestion(params: DeleteQuestionParams) {
+    try {
 
         connectToDatabase()
 
-        const {questionId, path} = params
+        const { questionId, path } = params
 
         await Question.findByIdAndDelete(questionId)
 
-        await Answer.deleteMany({question:questionId})
+        await Answer.deleteMany({ question: questionId })
 
-        await Interaction.deleteMany({question:questionId})
+        await Interaction.deleteMany({ question: questionId })
 
-        await Tag.updateMany({questions:questionId},{$pull:{questions:questionId}})
+        await Tag.updateMany({ questions: questionId }, { $pull: { questions: questionId } })
 
         revalidatePath(path)
 
-    }catch(error){
+    } catch (error) {
         console.log(error)
     }
 }

@@ -8,6 +8,7 @@ import { FilterQuery } from 'mongoose'
 import Question from "@/database/question.model"
 import Tag from "@/database/tag.model"
 import Answer from "@/database/answer.model"
+import { pageSize } from "@/constants"
 
 export async function getUserById(params: any) {
     try {
@@ -87,23 +88,42 @@ export async function getAllUsers(params: GetAllUsersParams) {
     try {
         connectToDatabase()
 
-        const { searchQuery, filter, page = 1, pageSize = 20 } = params
+        const { searchQuery, filter, page = 1 } = params
+        const skipSize = (page - 1) * 20
 
-        const query:FilterQuery<typeof User> = {}
+        const query: FilterQuery<typeof User> = {}
 
-        if(searchQuery){
+        if (searchQuery) {
             query.$or = [
-                {name:{$regex:new RegExp(searchQuery,"i")}},
-                {username:{$regex:new RegExp(searchQuery,"i")}}
+                { name: { $regex: new RegExp(searchQuery, "i") } },
+                { username: { $regex: new RegExp(searchQuery, "i") } }
             ]
+        }
+
+        let sortOptions = {}
+
+        switch (filter) {
+            case "new_users":
+                sortOptions = { joinedAt: -1 }
+                break
+            case "old_users":
+                sortOptions = { joinedAt: 1 }
+                break
+            default:
+                sortOptions = { reputation: -1 }
+                break
         }
 
         const users = await User.find(query)
             .limit(pageSize)
             .skip((page - 1) * pageSize)
-            .sort({ createdAt: -1 })
+            .sort(sortOptions)
 
-        return { users }
+        const totalUsers= users.length
+
+        const isNext: boolean = totalUsers > skipSize + pageSize
+
+        return { users, isNext }
 
     } catch (error) {
         console.log(error)
@@ -140,7 +160,7 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
     try {
         connectToDatabase()
 
-        const { clerkId, filter, searchQuery, page = 1, pageSize = 10 } = params
+        const { clerkId, filter, searchQuery, page = 1} = params
 
         const query: FilterQuery<typeof Question> = searchQuery
             ? {
@@ -148,6 +168,29 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
                     $regex: new RegExp(searchQuery, 'i')
                 }
             } : {}
+
+        let sortOptions = {}
+
+        switch (filter) {
+            case "most_recent":
+                sortOptions = { createdAt: -1 }
+                break;
+            case "oldest":
+                sortOptions = { createdAt: 1 }
+                break;
+            case "most_voted":
+                sortOptions = { upvotes: -1 }
+                break;
+            case "most_viewed":
+                sortOptions = { views: -1 }
+                break;
+            case "most_answered":
+                sortOptions = { answers: -1 }
+                break;
+
+            default:
+                break;
+        }
 
         const user = await User.findOne({ clerkId })
             .populate({
@@ -165,14 +208,17 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
                     { path: 'author', model: User, select: '_id clerkId name picture' }
                 ]
             })
+            .sort(sortOptions)
 
 
         if (!user) {
             throw new Error('User not found')
         }
 
+
         return {
-            questions: user.saved
+            questions: user.saved,
+
         }
     }
 
@@ -189,7 +235,7 @@ export async function getUserInfo(params: GetUserByIdParams) {
 
         const user = await User.findOne({ clerkId: userId })
 
-        if(!user) {
+        if (!user) {
             throw new Error('User not found')
         }
 
@@ -203,7 +249,7 @@ export async function getUserInfo(params: GetUserByIdParams) {
             totalAnswers
         }
 
-    }catch(error) {
+    } catch (error) {
         console.log(error)
     }
 }
@@ -246,13 +292,13 @@ export async function getUserAnswers(params: GetUserStatsParams) {
         connectToDatabase()
 
         const { userId, page = 1, pageSize = 10 } = params
-        
+
         const totalAnswers = await Answer.countDocuments({ autor: userId })
 
         const answers = await Answer.find({ autor: userId })
             .limit(pageSize)
             .skip((page - 1) * pageSize)
-            .sort({ upvotes:-1})
+            .sort({ upvotes: -1 })
             .populate('question', '_id title')
             .populate('author', '_id clerkId name picture')
 
