@@ -33,9 +33,9 @@ const Question = ({ mongoUserId, type, questionDetails }: { mongoUserId: string,
     const pathname = usePathname()
     const { mode } = useTheme()
 
-    const parsedQuestionDetails = JSON.parse(questionDetails) || {}
+    const parsedQuestionDetails = questionDetails ? JSON.parse(questionDetails) : {}
 
-    const groupedTags = parsedQuestionDetails.tags.map((tag: any) => tag.name)
+    const groupedTags = parsedQuestionDetails.tags ? parsedQuestionDetails.tags.map((tag: any) => tag.name) : []
 
 
     const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, field: any) => {
