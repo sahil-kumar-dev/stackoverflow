@@ -1,5 +1,6 @@
 'use client'
 
+import { revalidatePath } from 'next/cache'
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
 const ThemeContext = createContext<any>(null)

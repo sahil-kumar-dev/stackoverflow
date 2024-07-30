@@ -6,6 +6,8 @@ import { AnswerVoteParams, CreateAnswerParams, DeleteAnswerParams, GetAnswersPar
 import Question from "@/database/question.model";
 import { revalidatePath } from "next/cache";
 import Interaction from "@/database/interaction.model";
+import { QuestionsSchema } from "../validations";
+import User from "@/database/user.model";
 
 export async function createAnswer(params: CreateAnswerParams) {
     try {
@@ -19,11 +21,21 @@ export async function createAnswer(params: CreateAnswerParams) {
 
         // add the answer to the question's answer array
 
-        await Question.findByIdAndUpdate(question, {
+        const questionObject = await Question.findByIdAndUpdate(question, {
             $push: { answers: newAnswer._id }
         })
 
         // Todo add interaction
+
+        await Interaction.create({
+            user: author,
+            action: "answer",
+            question,
+            answer: newAnswer._id,
+            tags: questionObject.tags
+        })
+
+        await User.findByIdAndUpdate(author, { $inc: { reputation: 10 } })
 
         revalidatePath(path)
 
@@ -36,24 +48,24 @@ export async function getAnswers(params: GetAnswersParams) {
     try {
         connectToDatabase()
 
-        const { questionId,sortBy } = params
+        const { questionId, sortBy } = params
 
         let sortOptions = {}
 
         switch (sortBy) {
             case "highestUpvotes":
-                sortOptions = {upvotes:-1}
+                sortOptions = { upvotes: -1 }
                 break;
             case "lowestUpvotes":
-                sortOptions = {downvotes:-1}
+                sortOptions = { downvotes: -1 }
                 break;
             case "recent":
-                sortOptions = {createdAt:-1}
+                sortOptions = { createdAt: -1 }
                 break;
             case "old":
-                sortOptions = {createdAt:1}
+                sortOptions = { createdAt: 1 }
                 break;
-        
+
             default:
                 break;
         }
@@ -96,6 +108,10 @@ export async function upvoteAnswer(params: AnswerVoteParams) {
 
         // Increment author reputation by +10 
 
+        await User.findByIdAndUpdate(userId, { $inc: { reputation: hasupVoted ? -2 : +2 } })
+
+
+        await User.findByIdAndUpdate(answer.author, { $inc: { reputation: hasupVoted ? -10 : +10 } })
 
         revalidatePath(path)
 
@@ -132,6 +148,11 @@ export async function downvoteAnswer(params: AnswerVoteParams) {
 
         // Increment author reputation by +10 
 
+        await User.findByIdAndUpdate(userId, { $inc: { reputation: hasupVoted ? -2 : +2 } })
+
+
+        await User.findByIdAndUpdate(answer.author, { $inc: { reputation: hasdownVoted ? -10 : +10 } })
+
 
         revalidatePath(path)
 
@@ -141,21 +162,21 @@ export async function downvoteAnswer(params: AnswerVoteParams) {
     }
 }
 
-export async function deleteAnswer(params: DeleteAnswerParams){
-    try{
+export async function deleteAnswer(params: DeleteAnswerParams) {
+    try {
         connectToDatabase()
 
-        const {answerId, path} = params
+        const { answerId, path } = params
 
         await Answer.findByIdAndDelete(answerId)
 
-        await Interaction.deleteMany({answer:answerId})
+        await Interaction.deleteMany({ answer: answerId })
 
-        await Question.updateMany({answers:answerId},{$pull:{answers:answerId}})
+        await Question.updateMany({ answers: answerId }, { $pull: { answers: answerId } })
 
         revalidatePath(path)
 
-    }catch(error){
+    } catch (error) {
         console.log(error)
     }
 

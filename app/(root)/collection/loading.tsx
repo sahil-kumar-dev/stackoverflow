@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-const Loading = () => {
+const loading = () => {
   return (
     <section>
       <h1 className='h1-bold text-dark100_light900'>Saved Questions</h1>
@@ -19,4 +19,4 @@ const Loading = () => {
   );
 };
 
-export default Loading;
+export default loading;

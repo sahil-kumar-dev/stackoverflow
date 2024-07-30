@@ -9,6 +9,8 @@ import Question from "@/database/question.model"
 import Tag from "@/database/tag.model"
 import Answer from "@/database/answer.model"
 import { pageSize } from "@/constants"
+import { BadgeCriteriaType } from "@/types"
+import { assignBadges } from "../utils"
 
 export async function getUserById(params: any) {
     try {
@@ -119,7 +121,7 @@ export async function getAllUsers(params: GetAllUsersParams) {
             .skip((page - 1) * pageSize)
             .sort(sortOptions)
 
-        const totalUsers= users.length
+        const totalUsers = users.length
 
         const isNext: boolean = totalUsers > skipSize + pageSize
 
@@ -160,7 +162,7 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
     try {
         connectToDatabase()
 
-        const { clerkId, filter, searchQuery, page = 1} = params
+        const { clerkId, filter, searchQuery, page = 1 } = params
 
         const query: FilterQuery<typeof Question> = searchQuery
             ? {
