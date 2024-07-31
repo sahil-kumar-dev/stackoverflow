@@ -36,7 +36,7 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body className={`${inter.variable} ${space_grotesk.variable}`}>
+			<body className={` ${space_grotesk.className}`}>
 				<NextTopLoader
 					showSpinner={false}
 					color='#ff7000'
